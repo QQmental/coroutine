@@ -93,7 +93,7 @@ void CO_scheduler::run_wrapper(int upper, int lower)
     
     auto it = std::find_if( m_task_pkg_list.begin(), 
                             m_task_pkg_list.end(), 
-                            [](const Task_package *task_pkg){return task_pkg->co.status == eState::complete;});
+                            [](const Task_package *task_pkg){return task_pkg->co.status == eState::empty;});
 
     if (it == m_task_pkg_list.end())
     {
@@ -103,6 +103,9 @@ void CO_scheduler::run_wrapper(int upper, int lower)
     }
 
     CO_scheduler::Task_package &task_pkg = **it;
+    
+    static_assert(sizeof(uintptr_t) == sizeof(int) * 2, "a pointer is seperated into two 'int' variables. If it's not, modify this yourself");
+
     makecontext(&task_pkg.co.task_ctx, (void(*)(void))CO_scheduler::run_wrapper, 2, ((uintptr_t)&task_pkg)>>32, ((uintptr_t)&task_pkg)&0xFFFFFFFF);
 
     return CO_scheduler::Coroutine_handler(task_pkg);
