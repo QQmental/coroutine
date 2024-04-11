@@ -36,12 +36,12 @@ public:
     public:
 
         Coroutine_handler(CO_scheduler::Task_package &pkg);
-        Coroutine_handler(const Coroutine_handler &src) :impl(src.impl) {}
+        Coroutine_handler(const Coroutine_handler &src) : impl(src.impl) {};
         Coroutine_handler& operator=(const Coroutine_handler &src) = delete;
         ~Coroutine_handler();
-        CO_scheduler::eState Get_state()const noexcept;
+        CO_scheduler::eState Get_state() const noexcept;
         void yield() noexcept;
-        void run_task() noexcept;
+        void run_task() const noexcept;
 
     private:
 
@@ -53,6 +53,10 @@ public:
 
     [[nodiscard]]Coroutine_handler Add_task(corouting_task_t task, void *args);
 
+    // the state becomes empty. 
+    // it's undefined to call hdl.Get_state of handler after Recyle it.
+    void Recycle(CO_scheduler::Coroutine_handler hdl);
+
     void run_task(Coroutine_handler hdl);
 
 private:
@@ -62,9 +66,6 @@ private:
     eState Get_state(Coroutine_handler hdl) const noexcept ;
 
     std::vector<Task_package*> m_task_pkg_list;
-
-    //if id is 0, then no running task
-    Task_package * invoked_task;
 
     friend Coroutine_handler;
 };

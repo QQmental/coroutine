@@ -1,8 +1,5 @@
-#include <ucontext.h>
 #include <iostream>
-#include <vector>
-#include <algorithm>
-
+#include <assert.h>
 #include "coroutine.h"
 
 
@@ -11,13 +8,6 @@
 
 void print_hello1(CO_scheduler::Coroutine_handler &co, void *args)
 {
-/*     uint64_t i = 0, j = 1;
-    for(uint64_t num = 0 ; num < 1000000 ; i++, num++)
-    {
-        j += i;
-        if (num % 50 == 0)
-            co.yield();
-    } */
     int num = 0;
 
     printf("Hello1 %d\n", num);
@@ -34,13 +24,6 @@ void print_hello1(CO_scheduler::Coroutine_handler &co, void *args)
 }
 void print_hello2(CO_scheduler::Coroutine_handler &co, void *args)
 {
-/*      uint64_t i = 0, j = 1;
-    for(uint64_t num = 0 ; num < 1000000 ; i++, num++)
-    {
-        j += i;
-        if (num % 50 == 0)
-            co.yield();
-    } */
     int num = 0;
 
     printf("Hello2 %d\n", num);
@@ -80,6 +63,12 @@ void print_hello(CO_scheduler::Coroutine_handler &co, void *args)
 
     schr.run_task(hdl_1);
     schr.run_task(hdl_2);
+
+    assert(hdl_1.Get_state() == CO_scheduler::eState::complete);
+    assert(hdl_2.Get_state() == CO_scheduler::eState::complete);
+
+    schr.Recycle(hdl_1);
+    schr.Recycle(hdl_2);
 }
 
 int main()
@@ -89,15 +78,6 @@ int main()
     auto hdl = schr.Add_task(print_hello, &schr);
 
     schr.run_task(hdl);
-/*     for(int i = 0 ; i < 1000000/50 ; i++)
-    {
-        schr.run_task(id);
-        schr.run_task(id2);
-    } */
 
-
-
-    
-    
     return 0;    
 }

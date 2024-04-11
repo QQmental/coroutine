@@ -2,7 +2,7 @@
 #include <iostream>
 #include <vector>
 #include <algorithm>
-
+#include <assert.h>
 #include "coroutine.h"
 
 struct CO_scheduler::context_t
@@ -108,11 +108,19 @@ void CO_scheduler::run_wrapper(int upper, int lower)
     return CO_scheduler::Coroutine_handler(task_pkg);
 }
 
+
+void CO_scheduler::Recycle(Coroutine_handler hdl)
+{
+    hdl.impl.co.status = eState::empty;
+}
+
 void CO_scheduler::run_task(Coroutine_handler hdl)
 {
     if (auto status = hdl.impl.co.status ; status == eState::complete)
         return;
     
+    assert(hdl.impl.co.status == eState::ready || hdl.impl.co.status == eState::suspend);
+
     auto &task_pkg = hdl.impl;
     auto &co = task_pkg.co;
 
@@ -167,7 +175,7 @@ void CO_scheduler::Coroutine_handler::yield() noexcept
     impl.co.yield();
 }
 
-void CO_scheduler::Coroutine_handler::run_task() noexcept
+void CO_scheduler::Coroutine_handler::run_task() const noexcept
 {   
     impl.co.scheduler.run_task(*this);
 }
